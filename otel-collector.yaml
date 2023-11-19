@@ -2,9 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
-  
+
   filelog:
-    include: ["/var/lib/docker/containers/*.log"]
+    include: ["/etc/log/*log"]
   
   prometheus:
     config:
@@ -25,7 +25,8 @@ exporters:
   
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-
+    tls:
+      insecure: true
 
 service:
   pipelines:
