@@ -1,0 +1,96 @@
+version: '3.8'
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.89.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel-collector.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - '4317:4317'
+      - '8888:8888'
+      - '24224:24224'
+    depends_on:
+      - tempo
+  
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+    environment:
+      - ENDPOINT=otel-collector:4317
+    restart: always
+    depends_on:
+      - otel-collector
+      - tempo
+      - loki
+      - minio
+      - grafana
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo-data:/tmp/tempo
+      - ./shared/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"   # tempo
+    depends_on:
+      - grafana
+  
+  mimir:
+    image: grafana/mimir:latest
+    command: [ "-config.file=/etc/mimir.yaml" ]
+    volumes:
+      - ./shared/mimir.yaml:/etc/mimir.yaml
+      - ./mimir-data:/data
+    ports:
+      - "9009:9009"   # mimir
+    depends_on:
+      - grafana
+      - minio
+  
+  loki: 
+    image: grafana/loki:2.9.2
+    command: [ "-config.file=/etc/loki/loki.yaml" ]
+    volumes:
+      - ./shared/loki.yaml:/etc/loki/loki.yaml
+      - ./loki-data:/data
+    ports:
+      - "3100:3100"   # loki
+      - '7946:7946'   # loki-gossip
+    depends_on:
+      - grafana
+  
+  minio:
+    image: minio/minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler && \
+        minio server /data
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+    ports:
+      - 9000
+    volumes:
+      - ./.data/minio:/data
+
+volumes:
+  grafana-storage: {}

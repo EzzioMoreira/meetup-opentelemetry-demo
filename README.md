@@ -1,38 +1,23 @@
-## Requirements
+## OpenTelemetry Collector
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_hashicups"></a> [hashicups](#requirement\_hashicups) | ~> 0.3.1 |
+Monitoramento: é a prática de obter resposta rápida para perguntas frequentes.
+Observabilidade: é a capacidade de achar repostas para perguntas que ainda não temos.
+by Juraci Paixão
 
-## Providers
+### Sinais 
 
-| Name | Version |
-|------|---------|
-| <a name="provider_hashicups"></a> [hashicups](#provider\_hashicups) | 0.3.1 |
+Logs: É um registro de evento relevante e imutável gerado por sistema computacional ao longo do tempo.
 
-## Modules
+Trace: Também conhecido como rastreamento, trace ou tracing, possibilita acompanhar o fluxo e a condição de uma transação. 
 
-No modules.
+Métrica: É uma representação numérica de uma informação em relação ao tempo.
 
-## Resources
+### Referências: 
 
-| Name | Type |
-|------|------|
-| [hashicups_order.order](https://registry.terraform.io/providers/hashicorp/hashicups/latest/docs/resources/order) | resource |
-| [hashicups_coffees.all](https://registry.terraform.io/providers/hashicorp/hashicups/latest/docs/data-sources/coffees) | data source |
+[Observabilidade e Monitoramento](https://dev.to/ezziomoreira/observabilidade-e-monitoramento-1p1a)
 
-## Inputs
+[Três Pilares da Observabilidade](https://dev.to/ezziomoreira/tres-pilares-da-observabilidade-1p6d)
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_order"></a> [order](#input\_order) | Mapa de cafe e quantidade | `map(number)` | n/a | yes |
+[Conceitos OpenTelemetry](https://dev.to/ezziomoreira/conceitos-opentelemetry-9k0)
 
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_order_id"></a> [order\_id](#output\_order\_id) | n/a |
-
-## Como usar esse módulo
-[Acesse o passo-a-passo](how-to-use-this-module/README.md)
+[OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
