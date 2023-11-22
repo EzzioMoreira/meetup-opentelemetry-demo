@@ -55,3 +55,9 @@ Acesse o console do Grafana Web para explorar as métricas, traces e logs.
 [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
 
 [OpenTelemetry Collector Contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib)
+
+[Visualização Gráfica das Configurações do Collector](https://www.otelbin.io/)
+
+### Representação Gráfica das configurações do Collector
+
+![Imagem Collector](./img/collector.png)

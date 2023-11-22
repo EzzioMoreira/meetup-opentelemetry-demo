@@ -13,6 +13,18 @@ receivers:
         scrape_interval: 30s
         static_configs:
         - targets: ['127.0.0.1:8888']
+  
+processors:
+  metricstransform:
+    transforms:
+    - include: .+
+      match_type: regexp
+      action: insert
+      new_name: srv.docker
+      operations:
+        - action: add_label
+          new_label: srv.docker
+          new_value: srv-rapadura-corp
 
 exporters:
   otlp:
@@ -35,6 +47,7 @@ service:
       exporters: [otlp]
     metrics:
       receivers: [prometheus]
+      processors: [metricstransform]
       exporters: [prometheusremotewrite]
     logs:
       receivers: [filelog]
