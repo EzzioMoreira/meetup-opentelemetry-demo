@@ -3,9 +3,12 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.89.0
     command: [ "--config=/etc/otel-collector.yaml" ]
+    privileged: true
+    user: 0:0
     volumes:
       - ./otel-collector.yaml:/etc/otel-collector.yaml
-      - ./shared/:/etc/log/
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/etc/log/
     ports:
       - '4317:4317'
       - '8888:8888'
