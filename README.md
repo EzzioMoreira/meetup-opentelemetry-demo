@@ -27,11 +27,6 @@ Execute o seguinte comando no diretório raiz do projeto:
 docker-compose up -d  
 ```
 
-- Gerando logs: execute o comando para gerar logs e validar o funcionamento do Loki.
-
-```shell
-export i=0; while true; do echo "{\"level\":\"info\",\"time\":$(date +%s),\"msg\":\"This is my dummy log number ${i}\"}" >> ./shared/generated-log.log; i=$((i+1));sleep 1;done
-```
 ### Explorando dados
 
 Acesse o console do Grafana Web para explorar as métricas, traces e logs. 
