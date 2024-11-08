@@ -27,17 +27,17 @@ Execute o seguinte comando no diretório raiz do projeto:
 docker-compose up -d  
 ```
 
+### Step by Step
+
+- [Instrumentação sem código](instrumentação-manual.md)
+- [Instrumentação com código](instrumentação-código.md)
+
 ### Explorando dados
 
 Acesse o console do Grafana Web para explorar as métricas, traces e logs. 
 
 - http://localhost:3000/
 
-
-> Caso solicite usuário e senha, digite:
-
-- User: admin
-- Password: admin
 
 ### Referências
 

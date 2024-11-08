@@ -1,100 +1,84 @@
 version: '3.8'
 services:
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.89.0
-    command: [ "--config=/etc/otel-collector.yaml" ]
-    privileged: true
-    user: 0:0
-    volumes:
-      - ./otel-collector.yaml:/etc/otel-collector.yaml
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers/:/etc/log/
+  # Aplicação Python com OpenTelemetry
+  app:
+    build: .
+    container_name: app
     ports:
-      - '4317:4317'
-      - '8888:8888'
-      - '24224:24224'
-      - '55679:55679'
+      - "8080:8080"
     depends_on:
-      - tempo
-  
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+      - otelcollector
     environment:
-      - ENDPOINT=otel-collector:4317
-    restart: always
-    depends_on:
-      - otel-collector
-      - tempo
-      - loki
-      - minio
-      - grafana
-
+      - OTEL_SERVICE_NAME=app-python
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=app-python, service.version=1.0.0, service.env=dev
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+      - OTEL_PYTHON_LOG_CORRELATION=true
+  # OpenTelemetry Collector
+  otelcollector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otelcollector
+    volumes:
+      - ./config/collector/otelcol-config.yml:/etc/otel-collector-config.yml
+    command:
+      - "--config=/etc/otel-collector-config.yml"
+      - "--set=service.telemetry.logs.level=INFO"
+    ports:
+      - "4317:4317" # Porta de recebimento de traces gRPC
+      - "4318:4318" # Porta de recebimento de métricas HTTP
+  
+  # Grafana para visualização de métricas, logs e traces
   grafana:
     image: grafana/grafana
     container_name: grafana
-    restart: unless-stopped
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
     ports:
-      - '3000:3000'
+      - 3000:3000
     volumes:
-      - grafana-storage:/var/lib/grafana
-    
+      - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./config/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./config/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+  
+  # Grafana Tempo para armaazenamento de traces
   tempo:
     image: grafana/tempo:latest
+    container_name: tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./tempo-data:/tmp/tempo
-      - ./shared/tempo.yaml:/etc/tempo.yaml
+      - ./config/grafana/tempo.yaml:/etc/tempo.yaml
     ports:
-      - "3200:3200"   # tempo
+      - "3200:3200"
     depends_on:
       - grafana
   
+  # Grafana Mimir para armazenamento de métricas
   mimir:
     image: grafana/mimir:latest
+    container_name: mimir
     command: [ "-config.file=/etc/mimir.yaml" ]
     volumes:
-      - ./shared/mimir.yaml:/etc/mimir.yaml
-      - ./mimir-data:/data
+      - ./config/grafana/mimir.yaml:/etc/mimir.yaml
     ports:
-      - "9009:9009"   # mimir
+      - "9009:9009"
     depends_on:
       - grafana
-      - minio
   
+  # Grafana Loki para armazenamento de logs
   loki: 
-    image: grafana/loki:2.9.2
+    image: grafana/loki:latest
+    container_name: loki
     command: [ "-config.file=/etc/loki/loki.yaml" ]
     volumes:
-      - ./shared/loki.yaml:/etc/loki/loki.yaml
-      - ./loki-data:/data
+      - ./config/grafana/loki.yaml:/etc/loki/loki.yaml
     ports:
-      - "3100:3100"   # loki
-      - '7946:7946'   # loki-gossip
+      - "3100:3100"
+      - '7946:7946'
     depends_on:
       - grafana
-  
-  minio:
-    image: minio/minio
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /data/loki-data && \
-        mkdir -p /data/loki-ruler && \
-        minio server /data
-    environment:
-      - MINIO_ROOT_USER=loki
-      - MINIO_ROOT_PASSWORD=supersecret
-      - MINIO_PROMETHEUS_AUTH_TYPE=public
-      - MINIO_UPDATE=off
-    ports:
-      - 9000
-    volumes:
-      - ./.data/minio:/data
 
-volumes:
-  grafana-storage: {}
+x-default-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+    tag: "{{.Name}}"
