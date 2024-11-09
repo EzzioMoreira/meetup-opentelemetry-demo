@@ -1,18 +1,4 @@
-## OpenTelemetry Collector
-
-**Monitoramento**: é a prática de obter resposta rápida para perguntas frequentes.
-
-**Observabilidade**: é a capacidade de achar repostas para perguntas que ainda não temos.
-
-[by Juraci Paixão](https://www.linkedin.com/in/jpkroehling/)
-
-### Telemetria
-
-**Logs**: É um registro de evento relevante e imutável gerado por sistema computacional ao longo do tempo.
-
-**Trace**: Também conhecido como rastreamento, trace ou tracing, possibilita acompanhar o fluxo e a condição de uma transação. 
-
-**Métrica**: É uma representação numérica de uma informação em relação ao tempo.
+## OpenTelemetry
 
 ### Requisitos
 
