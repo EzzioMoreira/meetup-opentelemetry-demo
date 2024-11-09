@@ -1,3 +1,7 @@
+# Meetup DevOps Ceará - Novembro 2024
+
+Acesse este [link](https://github.com/EzzioMoreira/meetup-opentelemetry-demo/tree/feat/add-meetup-novembro-2024) para visualizar o código fonte.
+
 ## OpenTelemetry Collector
 
 **Monitoramento**: é a prática de obter resposta rápida para perguntas frequentes.
